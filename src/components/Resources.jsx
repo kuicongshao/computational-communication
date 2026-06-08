@@ -96,19 +96,131 @@ const dataSources = [
   title, category: "数据来源", tags: ["数据", "伦理", "平台"], intro, use: `可研究的问题：${question}`, learn: `适合方法：${methods}。可形成图表：${charts}。`, path: "只使用公开数据，遵守平台规则，不采集隐私数据；论文中说明数据来源、采集时间、筛选标准和样本规模。", classroom, example: `项目操作示例：确定关键词和时间范围，记录公开页面样本，建立字段表，再进行${methods.split("、")[0]}。`, advice: "研究伦理优先于数据规模。不要采集手机号、私信、精确位置等隐私信息，引用评论时应做匿名化处理。"
 }));
 
-const papers = [
-  "计算传播学入门论文", "文本挖掘研究论文", "情感分析研究论文", "主题模型研究论文", "机器学习与传播分类论文", "平台化传播研究论文", "国际传播与国家形象研究论文", "品牌传播数据分析论文"
-].map((title) => ({
-  title,
+const paperTopics = [
+  {
+    title: "计算传播学",
+    intro: "从数字痕迹、计算社会科学到传播研究方法融合，帮助学生理解为什么传播学可以用数据、算法和可复现流程提出问题。",
+    keywords: "computational communication science, computational social science, digital trace data, communication methods",
+    papers: [
+      ["经典文献", "A Twenty-First Century Science", "Duncan J. Watts", "2007", "Nature", "计算社会科学与网络化社会研究的基础视角", "用于理解复杂社会系统、网络数据和大规模行为数据为什么会改变传播研究。", "为课程中的知识图谱、平台数据与传播效果分析提供总论入口。", "A Twenty-First Century Science Duncan Watts Nature 2007"],
+      ["经典文献", "Computational Social Science", "David Lazer, Alex Pentland, Lada Adamic, Sinan Aral, Albert-Laszlo Barabasi, Devon Brewer, Nicholas Christakis, Noshir Contractor, James Fowler, Myron Gutmann, Tony Jebara, Gary King, Michael Macy, Deb Roy, Marshall Van Alstyne", "2009", "Science", "大规模社会数据与计算社会科学", "用于解释数字行为数据、网络关系和在线互动如何成为传播研究材料。", "帮助学生把平台评论、转发、互动指标放进计算社会科学框架。", "Computational Social Science Lazer Pentland Adamic Science 2009"],
+      ["近年研究", "Big Data and the Future of Communication Research", "Dhavan V. Shah, Joseph N. Cappella, W. Russell Neuman", "2015", "Annals of the International Communication Association", "大数据对传播学研究问题和方法的影响", "用于梳理传播学如何处理大规模文本、网络与行为数据。", "适合作为课程开篇文献，连接理论问题、数据规模和方法选择。", "Big Data and the Future of Communication Research Shah Cappella Neuman 2015"],
+      ["近年研究", "On the Interpretation of Digital Trace Data in Communication and Social Computing Research", "Deen Freelon", "2014", "Journal of Broadcasting & Electronic Media", "数字痕迹数据的解释边界", "用于提醒学生区分平台行为记录与真实态度、动机之间的关系。", "能训练学生在报告中写清楚数据局限和不能过度推断的部分。", "Deen Freelon digital trace data communication social computing 2014"],
+      ["近年研究", "When Communication Meets Computation: Opportunities, Challenges, and Pitfalls in Computational Communication Science", "Wouter van Atteveldt, Tai-Quan Peng", "2018", "Communication Methods and Measures", "计算传播学的方法机会与风险", "用于建立课程方法地图，理解自动化分析、可复现性和理论解释之间的关系。", "非常适合作为学生进入课程项目设计前的框架文献。", "When Communication Meets Computation van Atteveldt Peng 2018"]
+    ]
+  },
+  {
+    title: "文本挖掘",
+    intro: "聚焦文本作为数据的研究传统，帮助学生把新闻、评论、弹幕、帖子转化为可分析的语料和变量。",
+    keywords: "text as data, text mining, automated content analysis, computational text analysis",
+    papers: [
+      ["经典文献", "Machine Learning in Automated Text Categorization", "Fabrizio Sebastiani", "2002", "ACM Computing Surveys", "自动文本分类与机器学习综述", "用于理解文本分类任务、特征表示和评估指标。", "为后续情感分类、议题分类和平台评论分类打基础。", "Machine Learning in Automated Text Categorization Sebastiani 2002"],
+      ["经典文献", "Text as Data: The Promise and Pitfalls of Automatic Content Analysis Methods for Political Texts", "Justin Grimmer, Brandon M. Stewart", "2013", "Political Analysis", "自动内容分析的方法承诺与风险", "用于学习如何把文本分析结果与社会科学解释连接起来。", "帮助学生避免只展示词频或模型结果，而不解释传播学意义。", "Text as Data Grimmer Stewart Political Analysis 2013"],
+      ["近年研究", "Computer-Assisted Text Analysis for Comparative Politics", "Christopher Lucas, Richard A. Nielsen, Margaret E. Roberts, Brandon M. Stewart, Alex Storer, Dustin Tingley", "2015", "Political Analysis", "计算机辅助文本分析流程", "用于学习从语料收集、预处理、模型选择到验证的完整流程。", "可转化为课程项目的文本分析流程模板。", "Computer-Assisted Text Analysis for Comparative Politics Lucas Nielsen Roberts Stewart 2015"],
+      ["近年研究", "Text as Data", "Matthew Gentzkow, Bryan Kelly, Matt Taddy", "2019", "Journal of Economic Literature", "文本数据在社会科学中的研究设计", "用于理解文本特征、监督学习、主题模型与因果解释的关系。", "适合高阶学生写方法综述和项目设计依据。", "Text as Data Gentzkow Kelly Taddy 2019"],
+      ["经典文献", "Content Analysis: An Introduction to Its Methodology", "Klaus Krippendorff", "2018", "SAGE Publications", "内容分析方法论", "用于把人工编码、可靠性和自动化文本分析连接起来。", "提醒学生计算方法仍需要清晰概念、编码规则和效度意识。", "Krippendorff Content Analysis An Introduction to Its Methodology 2018"]
+    ]
+  },
+  {
+    title: "情感分析",
+    intro: "从早期影评情感分类到意见挖掘综述，帮助学生理解情绪、态度和评价如何被转化为文本分析任务。",
+    keywords: "sentiment analysis, opinion mining, subjectivity detection, affect analysis",
+    papers: [
+      ["经典文献", "Thumbs Up? Sentiment Classification Using Machine Learning Techniques", "Bo Pang, Lillian Lee, Shivakumar Vaithyanathan", "2002", "Proceedings of EMNLP", "机器学习情感分类", "用于理解情感分析作为监督学习任务的基本设定。", "适合学生复现“正向/负向评论分类”的最小项目。", "Thumbs Up Sentiment Classification Pang Lee Vaithyanathan 2002"],
+      ["经典文献", "Thumbs Up or Thumbs Down? Semantic Orientation Applied to Unsupervised Classification of Reviews", "Peter D. Turney", "2002", "Proceedings of ACL", "无监督情感倾向识别", "用于比较词典/语义倾向方法与监督学习方法的差异。", "帮助学生理解没有标注数据时如何做初步情感判断。", "Turney Thumbs Up or Thumbs Down Semantic Orientation 2002"],
+      ["经典文献", "Opinion Mining and Sentiment Analysis", "Bo Pang, Lillian Lee", "2008", "Foundations and Trends in Information Retrieval", "意见挖掘与情感分析综述", "用于系统阅读情感分析的任务类型、方法和评价方式。", "适合作为情感分析章节的核心综述。", "Opinion Mining and Sentiment Analysis Pang Lee 2008"],
+      ["近年研究", "Sentiment Analysis and Opinion Mining", "Bing Liu", "2012", "Morgan & Claypool Publishers", "情感分析与意见挖掘教材型专著", "用于查找情感极性、方面级情感、主观性识别等基本概念。", "便于学生把评论情绪分析写成规范的方法说明。", "Bing Liu Sentiment Analysis and Opinion Mining 2012"],
+      ["近年研究", "Sentiment Analysis: Detecting Valence, Emotions, and Other Affectual States from Text", "Saif M. Mohammad", "2016", "Emotion Measurement", "文本中的情绪、效价和情感状态识别", "用于扩展二分类情感分析，理解愤怒、喜悦、悲伤等细分情绪。", "适合平台舆情、品牌评价和国际传播评论研究。", "Saif Mohammad Sentiment Analysis Detecting Valence Emotions 2016"]
+    ]
+  },
+  {
+    title: "LDA主题模型",
+    intro: "围绕概率主题模型、可解释性和社会科学文本应用，帮助学生学习从大规模语料中发现议题结构。",
+    keywords: "Latent Dirichlet Allocation, topic models, semantic coherence, structural topic model",
+    papers: [
+      ["经典文献", "Latent Dirichlet Allocation", "David M. Blei, Andrew Y. Ng, Michael I. Jordan", "2003", "Journal of Machine Learning Research", "LDA主题模型原始论文", "用于理解文档-主题-词语三层结构和概率生成思想。", "是课程中主题模型章节必须知道的基础文献。", "Latent Dirichlet Allocation Blei Ng Jordan 2003"],
+      ["经典文献", "Finding Scientific Topics", "Thomas L. Griffiths, Mark Steyvers", "2004", "Proceedings of the National Academy of Sciences", "用主题模型发现科学文献主题", "用于理解主题模型如何描述大规模文献集合的主题演化。", "可启发学生分析新闻议题、评论主题和课程文献图谱。", "Finding Scientific Topics Griffiths Steyvers PNAS 2004"],
+      ["经典文献", "Reading Tea Leaves: How Humans Interpret Topic Models", "Jonathan Chang, Jordan Boyd-Graber, Sean Gerrish, Chong Wang, David M. Blei", "2009", "Advances in Neural Information Processing Systems", "主题模型的人类可解释性", "用于提醒学生主题模型输出需要人工解释和验证。", "帮助学生避免把模型编号直接当作研究结论。", "Reading Tea Leaves How Humans Interpret Topic Models Chang Boyd-Graber 2009"],
+      ["近年研究", "Optimizing Semantic Coherence in Topic Models", "David Mimno, Hanna M. Wallach, Edmund Talley, Miriam Leenders, Andrew McCallum", "2011", "Proceedings of EMNLP", "主题一致性与模型评估", "用于学习如何评估主题词是否语义一致。", "适合学生在项目报告中说明主题数选择和模型质量。", "Optimizing Semantic Coherence in Topic Models Mimno Wallach Talley Leenders McCallum 2011"],
+      ["近年研究", "Structural Topic Models for Open-Ended Survey Responses", "Margaret E. Roberts, Brandon M. Stewart, Dustin Tingley, Christopher Lucas, Jetson Leder-Luis, Shana Kushner Gadarian, Bethany Albertson, David G. Rand", "2014", "American Journal of Political Science", "结构主题模型及开放文本分析", "用于理解如何把文档元数据纳入主题模型解释。", "可迁移到平台、时间、账号类型等变量对主题分布的影响分析。", "Structural Topic Models for Open-Ended Survey Responses Roberts Stewart Tingley 2014"]
+    ]
+  },
+  {
+    title: "BERTopic",
+    intro: "围绕语义向量、聚类和c-TF-IDF的现代主题发现流程，帮助学生理解BERTopic不是单一算法，而是一套组合式主题建模管线。",
+    keywords: "BERTopic, BERT, Sentence-BERT, UMAP, HDBSCAN, neural topic modeling",
+    papers: [
+      ["近年研究", "BERTopic: Neural Topic Modeling with a Class-Based TF-IDF Procedure", "Maarten Grootendorst", "2022", "arXiv", "BERTopic方法说明", "用于理解嵌入、降维、聚类和主题词表示的组合流程。", "适合课程中对比 LDA 与语义主题模型。", "BERTopic Neural Topic Modeling with a Class-Based TF-IDF Procedure Grootendorst 2022"],
+      ["经典文献", "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", "Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova", "2019", "Proceedings of NAACL-HLT", "BERT语义表示基础", "用于理解BERTopic依赖的上下文语义表示思想。", "帮助学生解释为什么语义向量能比词袋更好地处理短文本。", "BERT Pre-training of Deep Bidirectional Transformers Devlin Chang Lee Toutanova 2019"],
+      ["近年研究", "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks", "Nils Reimers, Iryna Gurevych", "2019", "Proceedings of EMNLP-IJCNLP", "句向量表示", "用于理解文本句子如何被表示成可聚类的向量。", "适合解释评论、标题、弹幕等短文本主题发现。", "Sentence-BERT Sentence Embeddings Reimers Gurevych 2019"],
+      ["近年研究", "UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction", "Leland McInnes, John Healy, James Melville", "2018", "arXiv", "降维方法", "用于理解BERTopic中为什么要把高维语义向量降维后再聚类。", "帮助学生在方法部分说明参数选择和可视化含义。", "UMAP Uniform Manifold Approximation Projection Dimension Reduction McInnes Healy Melville 2018"],
+      ["近年研究", "A Topic Modeling Comparison Between LDA, NMF, Top2Vec, and BERTopic to Demystify Twitter Posts", "Roman Egger, Joanne Yu", "2022", "Frontiers in Sociology", "主题模型方法比较", "用于比较传统主题模型与BERTopic在社交媒体短文本上的差异。", "适合学生选择微博、X/Twitter或评论语料的主题模型方案。", "Topic Modeling Comparison LDA NMF Top2Vec BERTopic Egger Yu 2022"]
+    ]
+  },
+  {
+    title: "机器学习文本分类",
+    intro: "从特征选择、支持向量机到深度学习文本分类，帮助学生把传播文本转化为可训练、可评估的分类模型。",
+    keywords: "text classification, text categorization, SVM, CNN text classification, feature selection",
+    papers: [
+      ["经典文献", "A Comparative Study on Feature Selection in Text Categorization", "Yiming Yang, Jan O. Pedersen", "1997", "Proceedings of ICML", "文本分类特征选择", "用于理解为什么词项选择会影响分类效果。", "适合学生学习TF-IDF、卡方检验和特征工程的作用。", "A Comparative Study on Feature Selection in Text Categorization Yang Pedersen 1997"],
+      ["经典文献", "Text Categorization with Support Vector Machines: Learning with Many Relevant Features", "Thorsten Joachims", "1998", "Proceedings of ECML", "支持向量机文本分类", "用于理解高维稀疏文本特征和SVM分类器。", "可作为sklearn文本分类项目的经典方法依据。", "Text Categorization with Support Vector Machines Joachims 1998"],
+      ["经典文献", "Text Classification from Labeled and Unlabeled Documents using EM", "Kamal Nigam, Andrew K. McCallum, Sebastian Thrun, Tom M. Mitchell", "2000", "Machine Learning", "半监督文本分类", "用于理解少量标注与大量未标注文本如何结合。", "适合讨论课程项目中人工标注成本较高时的策略。", "Text Classification from Labeled and Unlabeled Documents using EM Nigam McCallum Thrun Mitchell 2000"],
+      ["近年研究", "Convolutional Neural Networks for Sentence Classification", "Yoon Kim", "2014", "Proceedings of EMNLP", "CNN句子分类", "用于理解深度学习如何处理短文本分类。", "适合与传统TF-IDF+SVM方法比较。", "Convolutional Neural Networks for Sentence Classification Yoon Kim 2014"],
+      ["近年研究", "Character-level Convolutional Networks for Text Classification", "Xiang Zhang, Junbo Zhao, Yann LeCun", "2015", "Advances in Neural Information Processing Systems", "字符级文本分类", "用于理解不依赖人工分词的文本分类思路。", "对中文短文本、弹幕和社交媒体文本分类有启发意义。", "Character-level Convolutional Networks for Text Classification Zhang Zhao LeCun 2015"]
+    ]
+  },
+  {
+    title: "平台化传播",
+    intro: "围绕平台权力、平台化机制和文化生产，帮助学生理解为什么平台规则、算法分发和接口会塑造传播过程。",
+    keywords: "platformization, platform society, platform politics, social media platforms, digital platforms",
+    papers: [
+      ["经典文献", "The Politics of 'Platforms'", "Tarleton Gillespie", "2010", "New Media & Society", "平台概念与平台政治", "用于理解平台为什么不只是技术中介，也会影响公共表达和治理。", "适合解释短视频、社交媒体和内容平台的传播环境。", "The Politics of Platforms Tarleton Gillespie 2010"],
+      ["经典文献", "The Culture of Connectivity: A Critical History of Social Media", "Jose van Dijck", "2013", "Oxford University Press", "社交媒体连接文化", "用于理解社交媒体平台如何重组连接、可见性和数据化关系。", "帮助学生把平台互动指标放进社会文化背景。", "The Culture of Connectivity Jose van Dijck 2013"],
+      ["近年研究", "The Platformization of the Web: Making Web Data Platform Ready", "Anne Helmond", "2015", "Social Media + Society", "Web平台化与数据接口", "用于理解按钮、API、插件等如何让网络内容被平台数据化。", "适合分析平台数据来源和数据可得性的制度条件。", "The Platformization of the Web Anne Helmond 2015"],
+      ["近年研究", "The Platformization of Cultural Production: Theorizing the Contingent Cultural Commodity", "David B. Nieborg, Thomas Poell", "2018", "New Media & Society", "文化生产的平台化", "用于理解内容生产如何受平台商业模式和分发机制影响。", "可用于品牌传播、短视频传播和内容创作者研究。", "The Platformization of Cultural Production Nieborg Poell 2018"],
+      ["近年研究", "Platformisation", "Thomas Poell, David Nieborg, Jose van Dijck", "2019", "Internet Policy Review", "平台化概念综述", "用于快速把平台化理论、数据化和基础设施化联系起来。", "适合作为学生写平台传播理论框架的入口文献。", "Platformisation Poell Nieborg van Dijck 2019"]
+    ]
+  },
+  {
+    title: "国际传播与国家形象",
+    intro: "从软实力、公共外交、国家品牌到媒介框架，帮助学生把海外评论和跨文化文本分析放入国际传播脉络。",
+    keywords: "national image, public diplomacy, soft power, nation branding, international communication",
+    papers: [
+      ["经典文献", "Changing National Images: International Public Relations and Media Agenda Setting", "Jarol B. Manheim, Robert B. Albritton", "1984", "American Political Science Review", "国家形象与媒介议程设置", "用于理解国家形象如何受到国际公共关系和媒体议程影响。", "适合连接国家形象研究与新闻/平台文本分析。", "Changing National Images Manheim Albritton 1984"],
+      ["经典文献", "Soft Power: The Means to Success in World Politics", "Joseph S. Nye Jr.", "2004", "PublicAffairs", "软实力理论", "用于理解文化吸引力、价值观和政策形象在国际传播中的作用。", "帮助学生解释海外受众对文化内容的评价为何重要。", "Soft Power Joseph Nye 2004"],
+      ["经典文献", "Competitive Identity: The New Brand Management for Nations, Cities and Regions", "Simon Anholt", "2007", "Palgrave Macmillan", "国家、城市和地区品牌", "用于理解国家形象、城市形象与品牌管理之间的关系。", "可迁移到城市文旅传播和国家形象项目。", "Competitive Identity Simon Anholt 2007"],
+      ["近年研究", "Searching for a Theory of Public Diplomacy", "Eytan Gilboa", "2008", "The ANNALS of the American Academy of Political and Social Science", "公共外交理论", "用于梳理国际传播中政府、媒体和公众之间的关系。", "适合学生搭建国际传播项目的理论背景。", "Searching for a Theory of Public Diplomacy Gilboa 2008"],
+      ["近年研究", "Theorizing Mediated Public Diplomacy: The U.S. Case", "Robert M. Entman", "2008", "The International Journal of Press/Politics", "媒介化公共外交与框架", "用于理解新闻框架如何影响国家形象和国际舆论。", "适合与框架分析、情感分析和国家形象词网结合。", "Theorizing Mediated Public Diplomacy Entman 2008"]
+    ]
+  },
+  {
+    title: "品牌传播数据分析",
+    intro: "围绕在线口碑、评论挖掘、品牌结构和病毒传播，帮助学生把品牌传播问题转化为可分析的数据任务。",
+    keywords: "brand communication analytics, online word of mouth, consumer reviews, marketing text mining, brand analytics",
+    papers: [
+      ["经典文献", "Using Online Conversations to Study Word-of-Mouth Communication", "David Godes, Dina Mayzlin", "2004", "Marketing Science", "在线口碑传播", "用于理解在线讨论如何反映和影响口碑传播。", "适合作为小红书、微博、评论区品牌传播研究的起点。", "Using Online Conversations to Study Word-of-Mouth Communication Godes Mayzlin 2004"],
+      ["经典文献", "The Effect of Word of Mouth on Sales: Online Book Reviews", "Judith A. Chevalier, Dina Mayzlin", "2006", "Journal of Marketing Research", "在线评论与销售", "用于理解用户评论如何与市场结果关联。", "帮助学生区分互动、评价文本和传播效果指标。", "The Effect of Word of Mouth on Sales Online Book Reviews Chevalier Mayzlin 2006"],
+      ["近年研究", "Deriving the Pricing Power of Product Features by Mining Consumer Reviews", "Nikolay Archak, Anindya Ghose, Panagiotis G. Ipeirotis", "2011", "Management Science", "消费者评论挖掘与产品特征", "用于学习如何从评论文本中抽取产品属性和评价方向。", "适合品牌评论、产品体验和用户需求分析项目。", "Deriving the Pricing Power of Product Features by Mining Consumer Reviews Archak Ghose Ipeirotis 2011"],
+      ["近年研究", "Mine Your Own Business: Market-Structure Surveillance Through Text Mining", "Oded Netzer, Ronen Feldman, Jacob Goldenberg, Moshe Fresko", "2012", "Marketing Science", "文本挖掘与市场结构分析", "用于理解如何从消费者讨论中发现品牌竞争结构。", "可启发学生做品牌共现网络和用户认知地图。", "Mine Your Own Business Market-Structure Surveillance Through Text Mining Netzer Feldman Goldenberg Fresko 2012"],
+      ["近年研究", "Mining Marketing Meaning from Online Chatter: Strategic Brand Analysis of Big Data Using Latent Dirichlet Allocation", "Seshadri Tirunillai, Gerard J. Tellis", "2014", "Journal of Marketing Research", "LDA与品牌大数据分析", "用于学习如何用主题模型分析在线讨论中的品牌意义。", "非常适合把LDA主题模型应用到品牌传播数据分析。", "Mining Marketing Meaning from Online Chatter Tirunillai Tellis 2014"]
+    ]
+  }
+];
+
+const papers = paperTopics.map((topic) => ({
+  title: topic.title,
   category: "论文资源",
-  tags: ["论文", "综述", "研究设计"],
-  intro: `${title}适合作为课程项目的理论和方法入口，用来理解研究问题、数据来源、变量设计和结果解释方式。`,
-  use: "帮助学生把课堂项目放进已有研究脉络，明确自己的研究是在回答什么问题、补充什么材料、使用什么方法。",
-  learn: "阅读时重点看研究问题、理论概念、样本来源、变量定义、方法流程、结果解释和局限讨论。",
-  path: "不要编造题名和作者。建议在 CNKI、Google Scholar、学校图书馆或数据库中检索关键词：计算传播学、文本挖掘、平台传播、情感分析、主题模型、国家形象、品牌传播数据分析。",
-  classroom: "把一篇论文拆成“问题-数据-方法-发现-局限”五列表格，再转化为自己的课程项目设计。",
-  example: "文献综述写法示例：已有研究多从平台机制、用户互动和文本情绪三个角度解释传播效果，本项目在此基础上以评论文本为材料，进一步分析受众关注点与互动表现之间的关系。",
-  advice: "检索到文献后必须核验真实来源、作者、年份和页码；AI 只能辅助总结，不能替代原文阅读和规范引用。"
+  tags: ["真实文献", "经典文献", "近年研究"],
+  intro: `${topic.title}主题收录 ${topic.papers.length} 篇可检索文献，覆盖经典基础与近年研究，适合直接服务课程项目选题、方法选择和文献综述。`,
+  use: `研究主题：${topic.intro}`,
+  learn: "阅读时重点看题名、作者、年份、发表来源、研究主题、方法设计、样本来源、课程可迁移价值和局限说明。",
+  path: `建议用题名、作者和关键词组合检索。主题检索关键词：${topic.keywords}。如不能在数据库中确认 DOI，本平台不提供 DOI。`,
+  classroom: "把每篇文献拆成“问题-数据-方法-发现-课程项目启发”五列，再选择 2-3 篇写入自己的文献综述。",
+  example: "展开后查看真实论文条目。每篇文献均提供检索关键词，便于在 Google Scholar、Crossref、学校图书馆、CNKI 或出版商网站核验。",
+  advice: "引用前务必回到原文或数据库核验作者、年份、来源、卷期页码和 DOI；这里提供的是课程学习型推荐库，不替代正式参考文献表。",
+  papers: topic.papers.map(([type, title, authors, year, source, theme, method, value, keywords]) => ({
+    type, title, authors, year, source, theme, method, value, keywords
+  }))
 }));
 
 const videos = [
@@ -187,7 +299,10 @@ export default function Resources() {
     const normalizedQuery = query.trim().toLowerCase();
     return resources.filter((item) => {
       const matchFilter = activeFilter === "全部" || item.category === activeFilter;
-      const haystack = [item.title, item.category, item.intro, item.use, item.learn, item.path, item.classroom, item.example, item.advice, ...item.tags].join(" ").toLowerCase();
+      const paperHaystack = item.papers
+        ? item.papers.flatMap((paper) => [paper.type, paper.title, paper.authors, paper.year, paper.source, paper.theme, paper.method, paper.value, paper.keywords])
+        : [];
+      const haystack = [item.title, item.category, item.intro, item.use, item.learn, item.path, item.classroom, item.example, item.advice, ...item.tags, ...paperHaystack].join(" ").toLowerCase();
       const matchQuery = !normalizedQuery || haystack.includes(normalizedQuery);
       return matchFilter && matchQuery;
     });
@@ -277,7 +392,9 @@ export default function Resources() {
                         +
                       </span>
                     </button>
-                    {open && (
+                    {open && item.papers ? (
+                      <PaperLibrary item={item} />
+                    ) : open && (
                       <div className="border-t border-white/10 p-5">
                         <div className="grid gap-4 md:grid-cols-2">
                           <Detail title="在计算传播学中的用途" text={item.use} />
@@ -301,6 +418,55 @@ export default function Resources() {
           </section>
         ))
       )}
+    </div>
+  );
+}
+
+function PaperLibrary({ item }) {
+  return (
+    <div className="border-t border-white/10 p-5">
+      <div className="mb-5 grid gap-4 md:grid-cols-2">
+        <Detail title="主题定位" text={item.use} />
+        <Detail title="检索路径" text={item.path} />
+      </div>
+      <div className="space-y-4">
+        {item.papers.map((paper) => (
+          <article key={`${paper.title}-${paper.year}`} className="rounded-xl border border-amber/20 bg-ink/60 p-4 shadow-glow">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className={`rounded-full border px-3 py-1 text-xs ${
+                paper.type === "经典文献"
+                  ? "border-amber/35 bg-amber/10 text-amber"
+                  : "border-mint/35 bg-mint/10 text-mint"
+              }`}>
+                {paper.type}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/[.045] px-3 py-1 text-xs text-slate-300">
+                {paper.year}
+              </span>
+              <span className="rounded-full border border-cyan/20 bg-cyan/10 px-3 py-1 text-xs text-cyan">
+                可检索文献
+              </span>
+            </div>
+            <h4 className="text-lg font-semibold leading-7 text-white">{paper.title}</h4>
+            <p className="mt-2 text-sm leading-7 text-slate-300">
+              <span className="text-slate-400">作者：</span>{paper.authors}
+            </p>
+            <p className="text-sm leading-7 text-slate-300">
+              <span className="text-slate-400">期刊/会议/出版社：</span>{paper.source}
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <Detail title="研究主题" text={paper.theme} />
+              <Detail title="使用方法" text={paper.method} />
+              <Detail title="课程学习价值" text={paper.value} tone="mint" />
+              <Detail title="检索关键词" text={paper.keywords} />
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="mt-5 rounded-xl border border-violet/25 bg-violet/10 p-4 text-sm leading-7 text-slate-300">
+        <span className="font-semibold text-violet">引用提醒：</span>
+        本模块不写未核验 DOI。正式写作时请用题名和作者回到 Google Scholar、Crossref、Web of Science、出版社页面或学校图书馆数据库核验完整引文信息。
+      </div>
     </div>
   );
 }

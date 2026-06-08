@@ -8,6 +8,9 @@ import JobGraph from "./components/JobGraph.jsx";
 import MethodToolkit from "./components/MethodToolkit.jsx";
 import Projects from "./components/Projects.jsx";
 import Resources from "./components/Resources.jsx";
+import CourseAgents from "./components/CourseAgents.jsx";
+import AnalysisLab from "./components/AnalysisLab.jsx";
+import StudentProjects from "./components/StudentProjects.jsx";
 import About from "./components/About.jsx";
 
 const pages = {
@@ -19,6 +22,9 @@ const pages = {
   methods: MethodToolkit,
   projects: Projects,
   resources: Resources,
+  agents: CourseAgents,
+  lab: AnalysisLab,
+  studentProjects: StudentProjects,
   about: About
 };
 

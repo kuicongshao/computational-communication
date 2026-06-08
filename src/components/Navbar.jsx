@@ -6,7 +6,10 @@ const navItems = [
   ["job", "岗位能力图谱"],
   ["methods", "方法工具箱"],
   ["projects", "项目实战"],
+  ["studentProjects", "学生项目"],
   ["resources", "资源"],
+  ["agents", "课程智能体"],
+  ["lab", "智能分析实验室"],
   ["about", "关于课程"]
 ];
 

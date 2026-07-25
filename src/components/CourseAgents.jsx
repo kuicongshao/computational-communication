@@ -309,7 +309,7 @@ export default function CourseAgents() {
               <div><span className="text-cyan">输入：</span>{agent.input}</div>
               <div><span className="text-mint">输出：</span>{agent.output}</div>
             </div>
-            <p className="mt-3 text-xs leading-5 text-violet">示例任务：{agent.example}</p>
+            <p className="mt-3 text-xs leading-5 text-violet">案例参考 · 示例任务：{agent.example}</p>
           </button>
         ))}
       </section>
@@ -408,10 +408,10 @@ function LearningAgent({ form, setForm, onAnalyze }) {
 function TopicAgent({ form, setForm, onAnalyze }) {
   return (
     <div className="space-y-4">
-      <TextArea label="项目兴趣方向" value={form.interest} onChange={(value) => setForm({ ...form, interest: value })} placeholder="例如：城市文旅、国风文化、品牌评论、公共事件舆情" />
-      <TextInput label="平台" value={form.platform} onChange={(value) => setForm({ ...form, platform: value })} placeholder="例如：小红书、微博、抖音、B站、YouTube" />
-      <TextInput label="研究对象" value={form.object} onChange={(value) => setForm({ ...form, object: value })} placeholder="例如：城市文旅短视频评论、品牌笔记、新闻报道" />
-      <TextInput label="数据类型" value={form.dataType} onChange={(value) => setForm({ ...form, dataType: value })} placeholder="例如：评论文本、视频标题、互动指标、转发关系" />
+      <TextArea label="项目兴趣方向" value={form.interest} onChange={(value) => setForm({ ...form, interest: value })} placeholder="例如：传播现象、公共议题、文化内容或品牌活动" />
+      <TextInput label="平台" value={form.platform} onChange={(value) => setForm({ ...form, platform: value })} placeholder="例如：选择与项目相关的内容平台" />
+      <TextInput label="研究对象" value={form.object} onChange={(value) => setForm({ ...form, object: value })} placeholder="例如：某类传播内容、用户互动或公共议题" />
+      <TextInput label="数据类型" value={form.dataType} onChange={(value) => setForm({ ...form, dataType: value })} placeholder="例如：文本、互动指标、关系数据或图像" />
       <TextInput label="目标成果" value={form.outcome} onChange={(value) => setForm({ ...form, outcome: value })} placeholder="例如：课程论文、数据报告、传播策划案、可视化作品" />
       <AnalyzeButton onClick={onAnalyze}>生成项目设计报告</AnalyzeButton>
     </div>
@@ -453,9 +453,9 @@ function MethodAgent({ selected, setSelected, onAnalyze }) {
 function DiagnosisAgent({ form, setForm, onAnalyze }) {
   return (
     <div className="space-y-4">
-      <TextInput label="项目题目" value={form.title} onChange={(value) => setForm({ ...form, title: value })} placeholder="例如：小红书品牌评论中的用户情感与传播效果研究" />
+      <TextInput label="项目题目" value={form.title} onChange={(value) => setForm({ ...form, title: value })} placeholder="例如：某平台内容中的用户态度与传播效果研究" />
       <TextArea label="研究问题" value={form.questions} onChange={(value) => setForm({ ...form, questions: value })} placeholder="例如：用户主要讨论哪些议题？不同情感是否对应不同互动表现？" />
-      <TextInput label="数据来源" value={form.dataSource} onChange={(value) => setForm({ ...form, dataSource: value })} placeholder="例如：小红书公开笔记评论" />
+      <TextInput label="数据来源" value={form.dataSource} onChange={(value) => setForm({ ...form, dataSource: value })} placeholder="例如：公开内容、互动数据或调查材料" />
       <TextInput label="样本量" value={form.sampleSize} onChange={(value) => setForm({ ...form, sampleSize: value })} placeholder="例如：300 条评论" />
       <TextInput label="使用方法" value={form.methods} onChange={(value) => setForm({ ...form, methods: value })} placeholder="例如：词频分析、情感分析、LDA主题模型" />
       <TextArea label="预期结论" value={form.conclusion} onChange={(value) => setForm({ ...form, conclusion: value })} placeholder="例如：不同主题评论的情感倾向和互动表现存在差异" />
@@ -467,10 +467,10 @@ function DiagnosisAgent({ form, setForm, onAnalyze }) {
 function ResearchAgent({ form, setForm, onAnalyze }) {
   return (
     <div className="space-y-4">
-      <TextInput label="研究主题" value={form.topic} onChange={(value) => setForm({ ...form, topic: value })} placeholder="例如：城市文旅短视频的国际传播" />
-      <TextArea label="传播现象或研究背景" value={form.phenomenon} onChange={(value) => setForm({ ...form, phenomenon: value })} placeholder="例如：海外平台上国风内容的评论和转发持续增加" />
-      <TextInput label="研究对象" value={form.object} onChange={(value) => setForm({ ...form, object: value })} placeholder="例如：YouTube 国风短视频评论" />
-      <TextInput label="可用数据" value={form.data} onChange={(value) => setForm({ ...form, data: value })} placeholder="例如：评论文本、发布时间、点赞数、回复数" />
+      <TextInput label="研究主题" value={form.topic} onChange={(value) => setForm({ ...form, topic: value })} placeholder="例如：某一传播现象的受众反馈研究" />
+      <TextArea label="传播现象或研究背景" value={form.phenomenon} onChange={(value) => setForm({ ...form, phenomenon: value })} placeholder="例如：某类内容的互动与讨论持续增加" />
+      <TextInput label="研究对象" value={form.object} onChange={(value) => setForm({ ...form, object: value })} placeholder="例如：某平台中的相关内容或用户讨论" />
+      <TextInput label="可用数据" value={form.data} onChange={(value) => setForm({ ...form, data: value })} placeholder="例如：文本、互动指标和时间信息" />
       <TextArea label="最关注的关系或问题" value={form.concern} onChange={(value) => setForm({ ...form, concern: value })} placeholder="例如：不同叙事主题是否对应不同的国家形象评价" />
       <AnalyzeButton onClick={onAnalyze}>生成研究设计</AnalyzeButton>
     </div>
@@ -901,7 +901,7 @@ function buildDiagnosisReport(form) {
 
   if (!title) {
     risks.push("项目题目为空，暂时无法判断研究边界。");
-    suggestions.push("先写出“平台/对象/方法/问题”四个要素，例如“小红书品牌评论中的用户情感与主题结构研究”。");
+    suggestions.push("先写出“平台/对象/方法/问题”四个要素，例如“某平台内容中的用户态度与主题结构研究”。");
   } else if (hasAny(title, ["影响机制", "全国", "所有平台", "全网", "总体", "所有用户"])) {
     risks.push("选题可能过大，当前题目包含宏观或全覆盖表达。");
     suggestions.push("把范围压缩到一个平台、一个对象、一段时间和一个具体问题。");

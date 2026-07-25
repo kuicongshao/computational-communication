@@ -4,11 +4,11 @@ import SectionHeader from "./SectionHeader.jsx";
 const tencentFormUrl = "https://doc.weixin.qq.com/sheet/e3_AV8AZAYhAG8CN1Mwhi9gaRCWCm11Y?scode=AB8Aewc3AAcKn0PqhVAV8AZAYhAG8&tab=BB08J2";
 const feishuFormUrl = "https://www.feishu.cn/";
 
-const projectTypes = ["短视频分析", "小红书分析", "舆情分析", "品牌传播", "国际传播", "二次元社群", "其他"];
+const projectTypes = ["平台传播", "文本分析", "舆情分析", "品牌传播", "国际传播", "社群传播", "其他"];
 
 const emptyForm = {
   name: "",
-  type: "短视频分析",
+  type: "",
   members: "",
   question: "",
   dataSource: "",
@@ -31,7 +31,7 @@ const examples = [
   },
   {
     title: "抖音城市文旅传播效果分析",
-    type: "短视频分析",
+    type: "平台传播",
     intro: "比较城市文旅短视频中景观、叙事、音乐和评论反馈之间的关系。",
     data: "抖音公开视频标题、评论、点赞、收藏、转发等指标。",
     methods: "内容编码、评论情感分析、互动指标分析。",
@@ -40,7 +40,7 @@ const examples = [
   },
   {
     title: "B站弹幕情绪传播分析",
-    type: "二次元社群",
+    type: "社群传播",
     intro: "观察视频不同时间段弹幕情绪变化和社群互动表达。",
     data: "B站公开弹幕、评论、视频分段信息。",
     methods: "情感分析、时间序列分析、共词网络。",
@@ -67,7 +67,7 @@ const examples = [
   },
   {
     title: "二次元社群话语规训分析",
-    type: "二次元社群",
+    type: "社群传播",
     intro: "分析社群成员如何通过评论、弹幕和帖子形成身份边界与互动规范。",
     data: "公开帖子、评论、弹幕和社群讨论文本。",
     methods: "话语分析、文本分类、关键词共现。",
@@ -77,11 +77,10 @@ const examples = [
 ];
 
 const teacherTips = [
-  ["创建腾讯文档收集表", "进入腾讯文档，新建在线收集表或表格，字段对应项目名称、成员、研究问题、数据来源、样本量、方法、链接等。"],
-  ["创建飞书表单", "进入飞书工作台或飞书多维表格，新建表单视图，设置必填字段并开启收集链接。"],
-  ["替换表单链接", "在 src/components/StudentProjects.jsx 中修改 tencentFormUrl 或 feishuFormUrl 常量，即可替换按钮入口。"],
-  ["导出学生项目", "在腾讯文档或飞书表单后台导出 Excel，再按项目类型、方法完整度、图表质量筛选。"],
-  ["进入课程案例库", "优先选择研究问题清楚、数据来源规范、方法可复现、报告链接完整的项目进入课程案例库。"]
+  ["创建项目提交表", "设置项目名称、成员、研究问题、数据来源、样本量、分析方法与成果链接等通用字段。"],
+  ["收集学生项目", "向学生发布项目提交入口，按课程进度收集项目方案、过程材料和成果信息。"],
+  ["导出项目数据", "导出项目记录后，按项目状态、方法完整度与成果质量进行教学整理。"],
+  ["进入案例库", "将研究问题清楚、数据来源规范、方法可复现的优秀项目整理为课程案例参考。"]
 ];
 
 export default function StudentProjects() {
@@ -221,7 +220,7 @@ export default function StudentProjects() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <TextInput label="项目名称" value={form.name} onChange={(value) => update("name", value)} placeholder="例如：小红书品牌评论中的用户情感研究" />
+            <TextInput label="项目名称" value={form.name} onChange={(value) => update("name", value)} placeholder="例如：围绕某一传播现象的数据分析研究" />
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-cyan">项目类型</span>
               <select
@@ -229,19 +228,20 @@ export default function StudentProjects() {
                 onChange={(event) => update("type", event.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-ink/80 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan focus:shadow-glow"
               >
+                <option value="" disabled>请选择项目类型</option>
                 {projectTypes.map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
             </label>
             <TextInput label="小组成员" value={form.members} onChange={(value) => update("members", value)} placeholder="例如：张三、李四、王五" />
-            <TextInput label="样本量" value={form.sampleSize} onChange={(value) => update("sampleSize", value)} placeholder="例如：500 条评论" />
-            <TextInput label="数据来源" value={form.dataSource} onChange={(value) => update("dataSource", value)} placeholder="例如：小红书公开笔记评论" />
+            <TextInput label="样本量" value={form.sampleSize} onChange={(value) => update("sampleSize", value)} placeholder="例如：若干条公开数据" />
+            <TextInput label="数据来源" value={form.dataSource} onChange={(value) => update("dataSource", value)} placeholder="例如：公开平台内容、问卷或访谈材料" />
             <TextInput label="分析方法" value={form.methods} onChange={(value) => update("methods", value)} placeholder="例如：词频分析、情感分析、主题模型" />
             <TextInput label="项目链接" value={form.projectLink} onChange={(value) => update("projectLink", value)} placeholder="例如：网盘、GitHub、腾讯文档链接" />
             <TextInput label="报告链接" value={form.reportLink} onChange={(value) => update("reportLink", value)} placeholder="例如：课程报告在线文档链接" />
           </div>
 
           <div className="mt-4 grid gap-4">
-            <TextArea label="研究问题" value={form.question} onChange={(value) => update("question", value)} placeholder="例如：用户主要讨论哪些品牌议题？情感倾向如何分布？" />
+            <TextArea label="研究问题" value={form.question} onChange={(value) => update("question", value)} placeholder="例如：该传播现象呈现哪些特征？不同内容之间有何差异？" />
             <TextArea label="项目摘要" value={form.summary} onChange={(value) => update("summary", value)} placeholder="简要说明研究对象、数据、方法和主要发现。" />
           </div>
 
@@ -270,8 +270,8 @@ export default function StudentProjects() {
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-white">项目展示区</h2>
-            <p className="mt-1 text-sm text-slate-400">示例项目可作为学生选题、方法组合和汇报结构参考。</p>
+            <h2 className="text-2xl font-bold text-white">案例参考（示例项目）</h2>
+            <p className="mt-1 text-sm text-slate-400">以下内容仅用于学生选题、方法组合和汇报结构参考，不代表学生已提交项目。</p>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-soft">
             {["全部", ...projectTypes].map((type) => (
@@ -351,7 +351,10 @@ function ProjectCard({ project }) {
 function ExampleCard({ item }) {
   return (
     <article className="rounded-2xl border border-white/10 bg-panel/80 p-5 shadow-glow transition hover:-translate-y-1 hover:border-cyan/40">
-      <div className="mb-3 inline-flex rounded-full border border-amber/30 bg-amber/10 px-3 py-1 text-xs text-amber">{item.type}</div>
+      <div className="mb-3 flex flex-wrap gap-2">
+        <span className="rounded-full border border-violet/30 bg-violet/10 px-3 py-1 text-xs text-violet">示例项目</span>
+        <span className="rounded-full border border-amber/30 bg-amber/10 px-3 py-1 text-xs text-amber">{item.type}</span>
+      </div>
       <h3 className="text-xl font-semibold text-white">{item.title}</h3>
       <p className="mt-3 text-sm leading-7 text-slate-300">{item.intro}</p>
       <dl className="mt-4 space-y-3 text-sm leading-7">

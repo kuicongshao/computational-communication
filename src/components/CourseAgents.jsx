@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SectionHeader from "./SectionHeader.jsx";
+import { generateTeachingEnhancement, isDeepSeekConfigured } from "../api/deepseek.js";
 
 const agents = [
   {
@@ -203,7 +204,7 @@ const emptyResearch = {
   concern: ""
 };
 
-export default function CourseAgents() {
+export default function CourseAgents({ onNavigate }) {
   const [activeTab, setActiveTab] = useState("learning");
   const [learningForm, setLearningForm] = useState(emptyLearning);
   const [learningReport, setLearningReport] = useState(null);
@@ -216,6 +217,8 @@ export default function CourseAgents() {
   const [researchForm, setResearchForm] = useState(emptyResearch);
   const [researchReport, setResearchReport] = useState(null);
   const [copied, setCopied] = useState("");
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [aiStatus, setAiStatus] = useState(() => isDeepSeekConfigured() ? "已连接 DeepSeek：复杂任务可获得 AI 深化建议。" : "当前使用本地规则引擎；可在知行助手中连接你的 DeepSeek API 以启用复杂生成增强。 ");
 
   useEffect(() => {
     const activeAgent = agents.find((agent) => agent.id === activeTab)?.name;
@@ -280,6 +283,31 @@ export default function CourseAgents() {
     }
   };
 
+  const runStructuredAgent = async (task, input, buildReport, setReport) => {
+    const localReport = buildReport(input);
+    setReport(localReport);
+    setAiStatus("已生成本地结构化教学结果。");
+    if (!isDeepSeekConfigured()) return;
+
+    setIsEnhancing(true);
+    const enhancement = await generateTeachingEnhancement({ task, input, localOutline: summarizeReport(localReport) });
+    setIsEnhancing(false);
+    if (enhancement.ok) {
+      setReport([...localReport, { title: "DeepSeek AI 深化教学建议", tone: "violet", content: enhancement.content }]);
+      setAiStatus("本地规则已完成结构化结果，并已叠加 DeepSeek 复杂生成建议。");
+    } else {
+      setAiStatus(`已保留本地规则结果。${enhancement.reason || "DeepSeek 暂不可用。"}`);
+    }
+  };
+
+  const runDiagnosis = () => {
+    const input = mergeStoredProject(diagnosisForm);
+    setDiagnosisForm(input);
+    runStructuredAgent("项目评价", input, buildDiagnosisReport, setDiagnosisReport);
+  };
+
+  const hasActiveReport = Boolean({ learning: learningReport, topic: topicReport, method: methodReport, research: researchReport, diagnosis: diagnosisReport }[activeTab]);
+
   return (
     <div className="space-y-7">
       <SectionHeader
@@ -320,7 +348,7 @@ export default function CourseAgents() {
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-cyan">Agent Workspace</p>
             <h2 className="mt-1 text-xl font-semibold text-white">{agents.find((agent) => agent.id === activeTab)?.name}</h2>
           </div>
-          <p className="max-w-2xl text-sm leading-6 text-slate-400">点击上方卡片切换智能体。所有分析均在浏览器本地完成，不调用外部 API。</p>
+          <p className="max-w-2xl text-sm leading-6 text-slate-400">{aiStatus}</p>
         </div>
       </section>
 
@@ -339,17 +367,17 @@ export default function CourseAgents() {
             </button>
           </div>
 
-          {activeTab === "learning" && <LearningAgent form={learningForm} setForm={setLearningForm} onAnalyze={() => setLearningReport(buildLearningReport(learningForm))} />}
+          {activeTab === "learning" && <LearningAgent form={learningForm} setForm={setLearningForm} onAnalyze={() => runStructuredAgent("学习路径诊断", learningForm, (input) => appendLearningProfileContext(buildLearningReport(input)), setLearningReport)} loading={isEnhancing} />}
           {activeTab === "topic" && (
-            <TopicAgent form={topicForm} setForm={setTopicForm} onAnalyze={() => setTopicReport(buildTopicReport(topicForm))} />
+            <TopicAgent form={topicForm} setForm={setTopicForm} onAnalyze={() => runStructuredAgent("项目设计", topicForm, buildTopicReport, setTopicReport)} loading={isEnhancing} />
           )}
           {activeTab === "method" && (
-            <MethodAgent selected={selectedGoals} setSelected={setSelectedGoals} onAnalyze={() => setMethodReport(buildMethodReport(selectedGoals))} />
+            <MethodAgent selected={selectedGoals} setSelected={setSelectedGoals} onAnalyze={() => setMethodReport(buildMethodReport(selectedGoals))} loading={isEnhancing} />
           )}
           {activeTab === "diagnosis" && (
-            <DiagnosisAgent form={diagnosisForm} setForm={setDiagnosisForm} onAnalyze={() => setDiagnosisReport(buildDiagnosisReport(diagnosisForm))} />
+            <DiagnosisAgent form={diagnosisForm} setForm={setDiagnosisForm} onAnalyze={runDiagnosis} loading={isEnhancing} />
           )}
-          {activeTab === "research" && <ResearchAgent form={researchForm} setForm={setResearchForm} onAnalyze={() => setResearchReport(buildResearchReport(researchForm))} />}
+          {activeTab === "research" && <ResearchAgent form={researchForm} setForm={setResearchForm} onAnalyze={() => runStructuredAgent("研究设计", researchForm, buildResearchReport, setResearchReport)} loading={isEnhancing} />}
         </section>
 
         <section className="rounded-2xl border border-cyan/20 bg-ink/80 p-5 shadow-glow">
@@ -379,13 +407,14 @@ export default function CourseAgents() {
           {activeTab === "method" && <MethodReportView report={methodReport} />}
           {activeTab === "research" && <ReportView report={researchReport} placeholder="填写研究主题、对象、数据和关注关系后，生成研究设计方案。" />}
           {activeTab === "diagnosis" && <ReportView report={diagnosisReport} placeholder="填写项目题目、研究问题和数据方法后，生成项目诊断报告。" />}
+          {hasActiveReport && <AgentNextAction agent={activeTab} onNavigate={onNavigate} />}
         </section>
       </div>
     </div>
   );
 }
 
-function LearningAgent({ form, setForm, onAnalyze }) {
+function LearningAgent({ form, setForm, onAnalyze, loading }) {
   return (
     <div className="space-y-4">
       <label className="block">
@@ -400,12 +429,12 @@ function LearningAgent({ form, setForm, onAnalyze }) {
       <TextArea label="已经掌握的内容" value={form.mastered} onChange={(value) => setForm({ ...form, mastered: value })} placeholder="例如：Python 基础、pandas 读表、词频分析" />
       <TextArea label="当前最困惑的问题" value={form.difficulty} onChange={(value) => setForm({ ...form, difficulty: value })} placeholder="例如：看得懂代码，但不会设计研究问题和变量" />
       <TextInput label="每周可投入学习时间" value={form.weeklyHours} onChange={(value) => setForm({ ...form, weeklyHours: value })} placeholder="例如：4 小时" />
-      <AnalyzeButton onClick={onAnalyze}>生成学习路径</AnalyzeButton>
+      <AnalyzeButton onClick={onAnalyze} loading={loading}>生成学习路径</AnalyzeButton>
     </div>
   );
 }
 
-function TopicAgent({ form, setForm, onAnalyze }) {
+function TopicAgent({ form, setForm, onAnalyze, loading }) {
   return (
     <div className="space-y-4">
       <TextArea label="项目兴趣方向" value={form.interest} onChange={(value) => setForm({ ...form, interest: value })} placeholder="例如：传播现象、公共议题、文化内容或品牌活动" />
@@ -413,12 +442,12 @@ function TopicAgent({ form, setForm, onAnalyze }) {
       <TextInput label="研究对象" value={form.object} onChange={(value) => setForm({ ...form, object: value })} placeholder="例如：某类传播内容、用户互动或公共议题" />
       <TextInput label="数据类型" value={form.dataType} onChange={(value) => setForm({ ...form, dataType: value })} placeholder="例如：文本、互动指标、关系数据或图像" />
       <TextInput label="目标成果" value={form.outcome} onChange={(value) => setForm({ ...form, outcome: value })} placeholder="例如：课程论文、数据报告、传播策划案、可视化作品" />
-      <AnalyzeButton onClick={onAnalyze}>生成项目设计报告</AnalyzeButton>
+      <AnalyzeButton onClick={onAnalyze} loading={loading}>生成项目设计报告</AnalyzeButton>
     </div>
   );
 }
 
-function MethodAgent({ selected, setSelected, onAnalyze }) {
+function MethodAgent({ selected, setSelected, onAnalyze, loading }) {
   const toggle = (goal) => {
     setSelected(selected.includes(goal) ? selected.filter((item) => item !== goal) : [...selected, goal]);
   };
@@ -445,12 +474,12 @@ function MethodAgent({ selected, setSelected, onAnalyze }) {
           </label>
         ))}
       </div>
-      <AnalyzeButton onClick={onAnalyze}>推荐分析方法</AnalyzeButton>
+      <AnalyzeButton onClick={onAnalyze} loading={loading}>推荐分析方法</AnalyzeButton>
     </div>
   );
 }
 
-function DiagnosisAgent({ form, setForm, onAnalyze }) {
+function DiagnosisAgent({ form, setForm, onAnalyze, loading }) {
   return (
     <div className="space-y-4">
       <TextInput label="项目题目" value={form.title} onChange={(value) => setForm({ ...form, title: value })} placeholder="例如：某平台内容中的用户态度与传播效果研究" />
@@ -459,12 +488,12 @@ function DiagnosisAgent({ form, setForm, onAnalyze }) {
       <TextInput label="样本量" value={form.sampleSize} onChange={(value) => setForm({ ...form, sampleSize: value })} placeholder="例如：300 条评论" />
       <TextInput label="使用方法" value={form.methods} onChange={(value) => setForm({ ...form, methods: value })} placeholder="例如：词频分析、情感分析、LDA主题模型" />
       <TextArea label="预期结论" value={form.conclusion} onChange={(value) => setForm({ ...form, conclusion: value })} placeholder="例如：不同主题评论的情感倾向和互动表现存在差异" />
-      <AnalyzeButton onClick={onAnalyze}>生成项目诊断</AnalyzeButton>
+      <AnalyzeButton onClick={onAnalyze} loading={loading}>生成项目诊断</AnalyzeButton>
     </div>
   );
 }
 
-function ResearchAgent({ form, setForm, onAnalyze }) {
+function ResearchAgent({ form, setForm, onAnalyze, loading }) {
   return (
     <div className="space-y-4">
       <TextInput label="研究主题" value={form.topic} onChange={(value) => setForm({ ...form, topic: value })} placeholder="例如：某一传播现象的受众反馈研究" />
@@ -472,7 +501,7 @@ function ResearchAgent({ form, setForm, onAnalyze }) {
       <TextInput label="研究对象" value={form.object} onChange={(value) => setForm({ ...form, object: value })} placeholder="例如：某平台中的相关内容或用户讨论" />
       <TextInput label="可用数据" value={form.data} onChange={(value) => setForm({ ...form, data: value })} placeholder="例如：文本、互动指标和时间信息" />
       <TextArea label="最关注的关系或问题" value={form.concern} onChange={(value) => setForm({ ...form, concern: value })} placeholder="例如：不同叙事主题是否对应不同的国家形象评价" />
-      <AnalyzeButton onClick={onAnalyze}>生成研究设计</AnalyzeButton>
+      <AnalyzeButton onClick={onAnalyze} loading={loading}>生成研究设计</AnalyzeButton>
     </div>
   );
 }
@@ -506,15 +535,73 @@ function TextArea({ label, value, onChange, placeholder }) {
   );
 }
 
-function AnalyzeButton({ children, onClick }) {
+function AnalyzeButton({ children, onClick, loading }) {
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-xl border border-cyan/40 bg-cyan/15 px-5 py-3 text-sm font-semibold text-cyan shadow-glow transition hover:-translate-y-0.5 hover:bg-cyan/20"
+      disabled={loading}
+      className="w-full rounded-xl border border-cyan/40 bg-cyan/15 px-5 py-3 text-sm font-semibold text-cyan shadow-glow transition hover:-translate-y-0.5 hover:bg-cyan/20 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {children}
+      {loading ? "正在生成 AI 教学建议…" : children}
     </button>
   );
+}
+
+function AgentNextAction({ agent, onNavigate }) {
+  const actions = {
+    learning: ["下一步：进入知识图谱完成推荐章节", "knowledge", "进入知识图谱"],
+    topic: ["下一步：在 AI 工作流确认项目阶段与实践任务", "workflow", "进入 AI 工作流"],
+    method: ["下一步：用真实或小样本文本验证推荐方法", "lab", "进入智能分析实验室"],
+    research: ["下一步：回到方法工具箱核对研究问题与方法匹配", "methods", "进入方法工具箱"],
+    diagnosis: ["下一步：根据评价建议完善并生成项目成果卡片", "studentProjects", "进入学生项目中心"]
+  };
+  const [text, target, label] = actions[agent] || actions.learning;
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-mint/25 bg-mint/10 p-4">
+      <p className="text-sm leading-6 text-slate-200">{text}</p>
+      <button onClick={() => onNavigate?.(target)} className="rounded-xl border border-mint/35 bg-ink/70 px-4 py-2.5 text-sm font-semibold text-mint transition hover:bg-mint/15">{label}</button>
+    </div>
+  );
+}
+
+function summarizeReport(report) {
+  if (Array.isArray(report)) {
+    return report.map((section) => `${section.title}：${Array.isArray(section.content) ? section.content.join("；") : section.content}`).join("\n").slice(0, 5000);
+  }
+  return JSON.stringify(report).slice(0, 5000);
+}
+
+function mergeStoredProject(form) {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem("zhichuan-student-project") || "null");
+    if (!saved || typeof saved !== "object") return form;
+    return {
+      title: clean(form.title) || clean(saved.name),
+      questions: clean(form.questions) || clean(saved.question),
+      dataSource: clean(form.dataSource) || clean(saved.dataSource),
+      sampleSize: clean(form.sampleSize) || clean(saved.sampleSize),
+      methods: clean(form.methods) || clean(saved.methods),
+      conclusion: clean(form.conclusion) || clean(saved.summary)
+    };
+  } catch {
+    return form;
+  }
+}
+
+function appendLearningProfileContext(report) {
+  try {
+    const identity = JSON.parse(window.localStorage.getItem("zhichuan-learning-identity") || "null");
+    const workflow = JSON.parse(window.localStorage.getItem("zhichuan-ai-workflow-profile") || "null");
+    const agents = JSON.parse(window.localStorage.getItem("zhichuan-course-agent-usage") || "[]");
+    const completed = Array.isArray(workflow?.completed) ? workflow.completed.length : 0;
+    const used = Array.isArray(agents) ? agents.length : 0;
+    const profileText = identity?.name
+      ? `已读取本地学习档案：${identity.name}，学习阶段为“${identity.stage || "未填写"}”，兴趣方向为“${identity.interest || "未填写"}”。AI 工作流已完成 ${completed} 个步骤，已使用 ${used} 类课程智能体。`
+      : "尚未创建本地学习档案；建议先进入 AI 学习档案填写学习阶段和兴趣方向，以获得更精确的学习建议。";
+    return [...report, { title: "学习档案感知", tone: "violet", content: profileText }];
+  } catch {
+    return [...report, { title: "学习档案感知", tone: "violet", content: "当前无法读取本地学习档案；仍可根据本次输入生成学习路径。" }];
+  }
 }
 
 function ProjectTeachingLoop() {

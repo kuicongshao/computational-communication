@@ -1,107 +1,59 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { generateTeacherAnalysis, isDeepSeekConfigured } from "../api/deepseek.js";
+import { buildTeacherReport, reportToText } from "../utils/teacherReportGenerator.js";
 import SectionHeader from "./SectionHeader.jsx";
 
 const storageKey = "zhichuan-teacher-class-data";
+const reportStorageKey = "zhichuan-teacher-analysis-report";
 
 export default function TeacherDashboard({ onNavigate }) {
   const [students, setStudents] = useState(loadClassData);
+  const [report, setReport] = useState(loadTeacherReport);
+  const [reportOpen, setReportOpen] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const summary = useMemo(() => buildSummary(students), [students]);
-
-  const resetDemo = () => {
-    const data = createDemoStudents();
-    try { window.localStorage.setItem(storageKey, JSON.stringify(data)); } catch { /* 本地存储不可用时仍展示当前模拟数据。 */ }
-    setStudents(data);
+  useEffect(() => {
+    try {
+      if (report) window.localStorage.setItem(reportStorageKey, JSON.stringify(report));
+      else window.localStorage.removeItem(reportStorageKey);
+    } catch { /* 报告存储失败时保留当前页面报告。 */ }
+  }, [report]);
+  const refreshData = () => { const data = createDemoStudents(); saveClassData(data); setStudents(data); setReport(null); };
+  const clearStatistics = () => { if (!window.confirm("确认清空所有统计数据？")) return; saveClassData([]); setStudents([]); setReport(null); };
+  const generateReport = async () => {
+    if (!students.length) return;
+    setGenerating(true); setReportOpen(true);
+    const local = buildTeacherReport(summary);
+    if (isDeepSeekConfigured()) {
+      const response = await generateTeacherAnalysis(toAnonymousSummary(summary));
+      if (response.ok) setReport({ title: "《课程学习智能体教学分析报告》", mode: "api", generatedAt: new Date().toLocaleString(), sections: [["生成式AI增强分析", response.content]] });
+      else setReport({ ...local, mode: "local", generatedAt: new Date().toLocaleString() });
+    } else setReport({ ...local, generatedAt: new Date().toLocaleString() });
+    setGenerating(false);
   };
+  const copyReport = async () => { if (!report) return; try { await navigator.clipboard.writeText(reportToText(report)); } catch { /* 浏览器不支持时保持页面内报告可选中复制。 */ } };
 
-  return (
-    <div className="space-y-8">
-      <SectionHeader
-        eyebrow="ZhiChuan Teacher Dashboard"
-        title="AI 教学管理驾驶舱"
-        subtitle="面向教师的课程管理、学习诊断与项目评价工作台。当前版本使用本地模拟班级数据，不上传任何学生信息。"
-      />
-
-      <section className="rounded-3xl border border-cyan/20 bg-panel/80 p-6 shadow-glow sm:p-8">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-          <div>
-            <p className="text-sm font-semibold text-mint">计算传播学课程 · 本地模拟班级</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">以学习数据辅助教学决策</h2>
-            <p className="mt-2 text-sm leading-7 text-slate-300">聚合知识学习、项目实践与智能体使用记录，帮助教师识别班级共性困难并安排下一步教学。</p>
-          </div>
-          <button onClick={resetDemo} className="rounded-xl border border-white/10 bg-ink/70 px-4 py-3 text-sm text-slate-300 transition hover:border-cyan/50 hover:text-cyan">重置模拟班级数据</button>
-        </div>
-      </section>
-
-      <section>
-        <div className="mb-4"><p className="text-sm font-semibold text-cyan">Class Overview</p><h2 className="mt-1 text-2xl font-semibold text-white">班级学习概览</h2></div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <Metric label="学生数量" value={`${summary.count} 人`} tone="cyan" />
-          <Metric label="平均学习进度" value={`${summary.averageProgress}%`} tone="mint" />
-          <Metric label="章节完成情况" value={`${summary.chapterCompletion}%`} tone="violet" />
-          <Metric label="项目完成情况" value={`${summary.projectCompletion}%`} tone="amber" />
-          <Metric label="智能体使用次数" value={`${summary.agentUses} 次`} tone="cyan" />
-        </div>
-        <div className="mt-5 rounded-2xl border border-white/10 bg-ink/75 p-5 shadow-glow">
-          <div className="flex items-center justify-between gap-3"><h3 className="font-semibold text-white">章节完成情况</h3><span className="text-sm text-mint">班级平均 {summary.chapterCompletion}%</span></div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{summary.chapterProgress.map((value, index) => <div key={index} className="rounded-xl border border-white/10 bg-panel/70 p-3"><div className="flex justify-between text-xs"><span className="text-slate-400">第 {index + 1}-{index + 2} 章</span><span className="text-cyan">{value}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-cyan to-mint transition-all duration-500" style={{ width: `${value}%` }} /></div></div>)}</div>
-        </div>
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-2">
-        <DiagnosisPanel difficulties={summary.difficulties} />
-        <ProjectQuality summary={summary} />
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-        <TeacherAdvice summary={summary} />
-        <article className="rounded-2xl border border-violet/25 bg-violet/10 p-6 shadow-glow">
-          <p className="text-sm font-semibold text-violet">课程联动入口</p>
-          <h2 className="mt-1 text-2xl font-semibold text-white">从诊断到教学行动</h2>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <NavigateButton label="查看知识图谱" text="安排章节复习与学习任务" onClick={() => onNavigate("knowledge")} />
-            <NavigateButton label="查看学生项目" text="检查项目档案和成果提交" onClick={() => onNavigate("studentProjects")} />
-            <NavigateButton label="查看 AI 工作流" text="指导学生按阶段推进项目" onClick={() => onNavigate("workflow")} />
-            <NavigateButton label="查看学习档案" text="了解个体学习画像逻辑" onClick={() => onNavigate("learningProfile")} />
-          </div>
-        </article>
-      </section>
-
-      <section className="rounded-2xl border border-white/10 bg-panel/80 p-6 shadow-glow">
-        <p className="text-sm font-semibold text-cyan">Student Snapshot</p>
-        <h2 className="mt-1 text-2xl font-semibold text-white">模拟学生学习快照</h2>
-        <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[720px] text-left text-sm"><thead className="border-b border-white/10 text-slate-400"><tr><th className="px-3 py-3">学生</th><th className="px-3 py-3">学习进度</th><th className="px-3 py-3">项目状态</th><th className="px-3 py-3">主要困难</th><th className="px-3 py-3">智能体使用</th></tr></thead><tbody>{students.map((student) => <tr key={student.id} className="border-b border-white/[.06] text-slate-200"><td className="px-3 py-3 font-semibold">{student.name}</td><td className="px-3 py-3"><span className="text-mint">{student.progress}%</span></td><td className="px-3 py-3">{student.projectStatus}</td><td className="px-3 py-3 text-slate-400">{student.difficulty}</td><td className="px-3 py-3 text-cyan">{student.agentUses} 次</td></tr>)}</tbody></table></div>
-      </section>
-    </div>
-  );
-}
-
-function DiagnosisPanel({ difficulties }) {
-  return <article className="rounded-2xl border border-amber/25 bg-amber/10 p-6 shadow-glow"><p className="text-sm font-semibold text-amber">Learning Diagnosis</p><h2 className="mt-1 text-2xl font-semibold text-white">学习困难诊断</h2><div className="mt-5 space-y-4">{difficulties.map((item) => <div key={item.name} className="rounded-xl border border-white/10 bg-ink/70 p-4"><div className="flex items-center justify-between gap-3"><h3 className="font-semibold text-white">{item.name}</h3><span className="text-sm text-amber">{item.count} 人</span></div><p className="mt-2 text-sm leading-7 text-slate-300">教学建议：{item.advice}</p></div>)}</div></article>;
-}
-
-function ProjectQuality({ summary }) {
-  return <article className="rounded-2xl border border-mint/25 bg-mint/10 p-6 shadow-glow"><p className="text-sm font-semibold text-mint">Project Quality</p><h2 className="mt-1 text-2xl font-semibold text-white">项目质量分析</h2><div className="mt-5 grid grid-cols-3 gap-3"><Metric label="项目数量" value={`${summary.projects} 个`} tone="cyan" /><Metric label="优秀项目" value={`${summary.excellentProjects} 个`} tone="mint" /><Metric label="待修改" value={`${summary.revisionProjects} 个`} tone="amber" /></div><div className="mt-5 rounded-xl border border-white/10 bg-ink/70 p-4"><h3 className="font-semibold text-white">常见问题</h3><ul className="mt-3 space-y-2 text-sm leading-7 text-slate-300"><li>• 数据不足：建议先开展 20-30 条样本试采，明确字段与可得性。</li><li>• 方法不匹配：要求学生逐项对应“研究问题—数据字段—分析方法”。</li><li>• 研究问题过大：限定一个平台、一个对象、一段时间和 2-3 个 RQ。</li></ul></div></article>;
-}
-
-function TeacherAdvice({ summary }) {
-  const focus = summary.difficulties[0]?.name || "数据分析困难";
-  return <article className="rounded-2xl border border-cyan/25 bg-cyan/10 p-6 shadow-glow"><p className="text-sm font-semibold text-cyan">Teacher AI Advice</p><h2 className="mt-1 text-2xl font-semibold text-white">本周教学建议</h2><div className="mt-5 space-y-4 text-sm leading-7 text-slate-200"><div className="rounded-xl border border-white/10 bg-ink/70 p-4"><span className="font-semibold text-mint">推荐加强：</span>文本分析教学。围绕词频、情感分析和主题模型，用同一份评论数据演示“问题—方法—图表”的完整过程。</div><div className="rounded-xl border border-white/10 bg-ink/70 p-4"><span className="font-semibold text-mint">推荐实践：</span>舆情分析项目。让学生以公开评论为材料完成小样本清洗、主题归纳和情感变化图。</div><div className="rounded-xl border border-white/10 bg-ink/70 p-4"><span className="font-semibold text-mint">重点关注：</span>{focus}。建议使用 AI项目策划与 AI数据分析智能体开展一次分组工作坊，并要求提交字段表和试分析截图。</div></div></article>;
+  return <div className="space-y-8"><SectionHeader eyebrow="Teacher Dashboard" title="AI 教学管理驾驶舱" subtitle="聚合本地模拟班级数据，辅助教师诊断学习进度、项目质量与课堂支持重点。" />
+    <div className="rounded-xl border border-cyan/20 bg-cyan/10 px-4 py-3 text-sm text-cyan">当前为模拟教学数据，用于功能展示与教学分析演示。</div>
+    <section className="rounded-3xl border border-cyan/20 bg-panel/80 p-6 shadow-glow sm:p-8"><div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center"><div><p className="text-sm font-semibold text-mint">计算传播学课程 · 本地模拟班级</p><h2 className="mt-2 text-2xl font-semibold text-white">课堂数据随刷新即时更新</h2><p className="mt-2 text-sm leading-7 text-slate-300">报告仅依据当前驾驶舱统计生成。连接模型时仅发送匿名聚合指标，不发送 API Key 或学生敏感信息。</p></div><div className="flex flex-wrap gap-3"><button onClick={generateReport} disabled={!students.length || generating} className="rounded-xl border border-mint/40 bg-mint/15 px-4 py-3 text-sm font-semibold text-mint disabled:opacity-50 hover:bg-mint/25">{generating ? "生成中…" : "生成AI教学分析报告"}</button><button onClick={refreshData} className="rounded-xl border border-cyan/40 bg-cyan/15 px-4 py-3 text-sm font-semibold text-cyan hover:bg-cyan/25">刷新数据</button><button onClick={clearStatistics} className="rounded-xl border border-amber/35 bg-amber/10 px-4 py-3 text-sm font-semibold text-amber hover:bg-amber/20">清空统计</button></div></div></section>
+    {!students.length ? <section className="rounded-2xl border border-dashed border-white/15 bg-panel/70 p-8 text-center text-slate-400">当前暂未有教学统计数据，请点击“刷新数据”生成新的教学快照。</section> : <><section><div className="mb-4"><p className="text-sm font-semibold text-cyan">Class Overview</p><h2 className="mt-1 text-2xl font-semibold text-white">班级学习概览</h2></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"><Metric label="学生数量" value={`${summary.count} 人`} tone="cyan" /><Metric label="平均学习进度" value={`${summary.averageProgress}%`} tone="mint" /><Metric label="章节完成情况" value={`${summary.chapterCompletion}%`} tone="violet" /><Metric label="项目完成情况" value={`${summary.projectCompletion}%`} tone="amber" /><Metric label="智能体使用次数" value={`${summary.agentUses} 次`} tone="cyan" /></div></section>
+    <section className="grid gap-5 lg:grid-cols-2"><Diagnosis summary={summary} /><Quality summary={summary} /></section><Advice summary={summary} />
+    <section className="rounded-2xl border border-violet/25 bg-violet/10 p-6 shadow-glow"><p className="text-sm font-semibold text-violet">课程联动入口</p><h2 className="mt-1 text-2xl font-semibold text-white">从诊断到教学行动</h2><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[["知识图谱", "安排章节复习与学习任务", "knowledge"], ["学生项目", "检查项目档案和成果提交", "studentProjects"], ["AI工作流", "指导学生按阶段推进项目", "workflow"], ["学习档案", "了解个体学习画像逻辑", "learningProfile"]].map(([label, text, page]) => <button key={page} onClick={() => onNavigate(page)} className="rounded-xl border border-white/10 bg-ink/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet/50"><h3 className="font-semibold text-white">{label}</h3><p className="mt-2 text-xs leading-5 text-slate-400">{text}</p></button>)}</div></section>
+    <section className="rounded-2xl border border-white/10 bg-panel/80 p-6 shadow-glow"><p className="text-sm font-semibold text-cyan">Student Snapshot</p><h2 className="mt-1 text-2xl font-semibold text-white">模拟学生学习快照</h2><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[1100px] text-left text-sm"><thead className="border-b border-white/10 text-slate-400"><tr>{["学生", "学习进度", "完成章节", "AI调用", "分析次数", "项目状态", "研究设计", "数据分析", "综合能力", "评价结果"].map((label) => <th key={label} className="px-3 py-3">{label}</th>)}</tr></thead><tbody>{students.map((student) => <tr key={student.id} className="border-b border-white/[.06] text-slate-200"><td className="px-3 py-3 font-semibold">{student.name}</td><td className="px-3 py-3 text-mint">{student.progress}%</td><td className="px-3 py-3">{student.completedChapters}</td><td className="px-3 py-3 text-cyan">{student.agentUses} 次</td><td className="px-3 py-3">{student.analysisCount} 次</td><td className="px-3 py-3">{student.projectStatus}</td><td className="px-3 py-3">{student.researchScore}</td><td className="px-3 py-3">{student.analysisScore}</td><td className="px-3 py-3 text-violet">{student.abilityScore}</td><td className="px-3 py-3">{student.evaluation}</td></tr>)}</tbody></table></div></section></>}
+    {report && <section className="rounded-3xl border border-mint/30 bg-panel/90 p-6 shadow-glow"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm font-semibold text-mint">{report.mode === "api" ? "生成式AI增强" : "本地教学分析"}</p><h2 className="mt-1 text-2xl font-semibold text-white">{report.title}</h2><p className="mt-1 text-xs text-slate-400">生成时间：{report.generatedAt}</p><p className="mt-2 text-xs text-mint/90">本报告基于当前模拟教学数据生成，仅用于平台功能展示。</p></div><div className="flex gap-2"><button onClick={copyReport} className="rounded-xl border border-cyan/30 px-3 py-2 text-sm text-cyan">复制报告</button><button onClick={() => setReport(null)} className="rounded-xl border border-amber/30 px-3 py-2 text-sm text-amber">清除报告</button><button onClick={() => setReportOpen((value) => !value)} className="rounded-xl border border-white/10 px-3 py-2 text-sm text-slate-300">{reportOpen ? "收起" : "展开"}</button></div></div>{reportOpen && <div className="mt-5 space-y-4">{report.sections.map(([title, text]) => <article key={title} className="rounded-xl border border-white/10 bg-ink/70 p-4"><h3 className="font-semibold text-white">{title}</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-300">{text}</p></article>)}</div>}</section>}
+  </div>;
 }
 
 function Metric({ label, value, tone }) { const colors = { cyan: "text-cyan", mint: "text-mint", violet: "text-violet", amber: "text-amber" }; return <div className="rounded-xl border border-white/10 bg-ink/70 p-4"><p className="text-xs text-slate-400">{label}</p><p className={`mt-2 text-lg font-semibold ${colors[tone]}`}>{value}</p></div>; }
-function NavigateButton({ label, text, onClick }) { return <button onClick={onClick} className="rounded-xl border border-white/10 bg-ink/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet/50"><h3 className="font-semibold text-white">{label}</h3><p className="mt-2 text-xs leading-5 text-slate-400">{text}</p></button>; }
-
-function buildSummary(students) {
-  const count = students.length || 1;
-  const averageProgress = Math.round(students.reduce((sum, item) => sum + item.progress, 0) / count);
-  const projects = students.filter((item) => item.projectStatus !== "未开始").length;
-  const excellentProjects = students.filter((item) => item.projectStatus === "优秀").length;
-  const revisionProjects = students.filter((item) => item.projectStatus === "待修改").length;
-  const difficultyData = ["项目设计困难", "方法选择困难", "数据分析困难"].map((name) => ({ name, count: students.filter((item) => item.difficulty === name).length, advice: adviceFor(name) })).sort((a, b) => b.count - a.count);
-  return { count: students.length, averageProgress, chapterCompletion: averageProgress, projectCompletion: Math.round((projects / count) * 100), agentUses: students.reduce((sum, item) => sum + item.agentUses, 0), projects, excellentProjects, revisionProjects, difficulties: difficultyData, chapterProgress: [62, 54, 47, 39, 31] };
-}
-
-function adviceFor(difficulty) { return { "项目设计困难": "示范使用 AI项目策划智能体，要求学生把兴趣、平台、对象、数据和成果填入项目设计报告。", "方法选择困难": "安排“研究问题—数据类型—方法匹配”对照练习，并使用 AI数据分析智能体复核。", "数据分析困难": "以 20 条真实评论开展词频、情感、主题的逐步演示，降低进入门槛。" }[difficulty]; }
-
-function loadClassData() { try { const saved = JSON.parse(window.localStorage.getItem(storageKey) || "null"); if (Array.isArray(saved) && saved.length) return saved; } catch { /* 使用默认模拟数据。 */ } const data = createDemoStudents(); try { window.localStorage.setItem(storageKey, JSON.stringify(data)); } catch { /* 仅当前会话展示。 */ } return data; }
-function createDemoStudents() { const names = ["林若涵", "陈思远", "王子墨", "刘雨桐", "张启航", "李佳宁", "周明宇", "赵可心", "孙浩然", "吴思琪", "黄博文", "徐安然"]; const progress = [78, 64, 46, 82, 55, 71, 39, 88, 61, 52, 73, 44]; const difficulties = ["方法选择困难", "数据分析困难", "项目设计困难", "数据分析困难", "方法选择困难", "项目设计困难"]; return names.map((name, index) => ({ id: `student-${index + 1}`, name, progress: progress[index], projectStatus: index === 3 || index === 7 ? "优秀" : index === 2 || index === 6 || index === 11 ? "待修改" : index === 8 ? "未开始" : "进行中", difficulty: difficulties[index % difficulties.length], agentUses: 2 + ((index * 3) % 6) })); }
+function Diagnosis({ summary }) { return <article className="rounded-2xl border border-amber/25 bg-amber/10 p-6 shadow-glow"><p className="text-sm font-semibold text-amber">Learning Diagnosis</p><h2 className="mt-1 text-2xl font-semibold text-white">学习困难诊断</h2><div className="mt-5 space-y-3">{summary.difficulties.map((item) => <div key={item.name} className="rounded-xl border border-white/10 bg-ink/70 p-4"><div className="flex justify-between"><b>{item.name}</b><span className="text-amber">{item.count} 人</span></div><p className="mt-2 text-sm leading-6 text-slate-300">{item.advice}</p></div>)}</div></article>; }
+function Quality({ summary }) { return <article className="rounded-2xl border border-mint/25 bg-mint/10 p-6 shadow-glow"><p className="text-sm font-semibold text-mint">Project Quality</p><h2 className="mt-1 text-2xl font-semibold text-white">项目质量分析</h2><div className="mt-5 grid grid-cols-3 gap-3"><Metric label="项目数量" value={`${summary.projects} 个`} tone="cyan" /><Metric label="优秀项目" value={`${summary.excellentProjects} 个`} tone="mint" /><Metric label="待修改" value={`${summary.revisionProjects} 个`} tone="amber" /></div><p className="mt-5 rounded-xl border border-white/10 bg-ink/70 p-4 text-sm leading-7 text-slate-300">常见问题：数据不足、方法不匹配、研究问题过大。建议先限定平台、对象与时间范围，再检查研究问题、数据字段与方法之间的对应关系。</p></article>; }
+function Advice({ summary }) { const focus = summary.difficulties[0]?.name || "数据分析困难"; return <article className="rounded-2xl border border-cyan/25 bg-cyan/10 p-6 shadow-glow"><p className="text-sm font-semibold text-cyan">Teacher AI Advice</p><h2 className="mt-1 text-2xl font-semibold text-white">本周教学建议</h2><p className="mt-4 text-sm leading-7 text-slate-200">推荐加强文本分析教学，并安排公开评论小样本的清洗、主题归纳与可视化练习。当前重点关注：{focus}。</p></article>; }
+function buildSummary(students) { const count = students.length || 1; const avg = (key) => students.length ? Math.round(students.reduce((sum, item) => sum + item[key], 0) / count) : 0; const projects = students.filter((item) => item.projectStatus !== "未开始").length; const difficulties = ["项目设计困难", "方法选择困难", "数据分析困难"].map((name) => ({ name, count: students.filter((item) => item.difficulty === name).length, advice: adviceFor(name) })).sort((a, b) => b.count - a.count); return { count: students.length, averageProgress: avg("progress"), chapterCompletion: students.length ? Math.round(avg("completedChapters") / 8 * 100) : 0, projectCompletion: students.length ? Math.round(projects / count * 100) : 0, agentUses: students.reduce((sum, item) => sum + item.agentUses, 0), analysisUses: students.reduce((sum, item) => sum + item.analysisCount, 0), averageAnalysisCount: avg("analysisCount"), averageResearchScore: avg("researchScore"), averageAnalysisScore: avg("analysisScore"), averageAbilityScore: avg("abilityScore"), projects, excellentProjects: students.filter((item) => item.projectStatus === "优秀").length, revisionProjects: students.filter((item) => item.projectStatus === "待修改").length, difficulties }; }
+function toAnonymousSummary(summary) { const { count, averageProgress, chapterCompletion, projectCompletion, agentUses, analysisUses, averageResearchScore, averageAnalysisScore, averageAbilityScore, projects, excellentProjects, revisionProjects, difficulties } = summary; return { count, averageProgress, chapterCompletion, projectCompletion, agentUses, analysisUses, averageResearchScore, averageAnalysisScore, averageAbilityScore, projects, excellentProjects, revisionProjects, difficulties: difficulties.map(({ name, count: difficultyCount }) => ({ name, count: difficultyCount })) }; }
+function adviceFor(difficulty) { return { "项目设计困难": "用项目策划智能体把兴趣、平台、对象、数据和成果转化为方案。", "方法选择困难": "安排“研究问题—数据类型—分析方法”对照练习。", "数据分析困难": "从20条评论的小样本演示词频、情感和主题分析。" }[difficulty]; }
+function loadClassData() { try { const saved = JSON.parse(window.localStorage.getItem(storageKey) || "null"); if (Array.isArray(saved)) return saved; } catch { /* 使用首次模拟数据 */ } const data = createDemoStudents(); saveClassData(data); return data; }
+function loadTeacherReport() { try { const saved = JSON.parse(window.localStorage.getItem(reportStorageKey) || "null"); return saved && typeof saved === "object" && Array.isArray(saved.sections) ? saved : null; } catch { return null; } }
+function saveClassData(data) { try { window.localStorage.setItem(storageKey, JSON.stringify(data)); } catch { /* 本地存储不可用时保留会话状态。 */ } }
+function createDemoStudents() { const templates = [["张三", 68, "方法选择困难"], ["李四", 54, "数据分析困难"], ["王五", 76, "项目设计困难"], ["赵六", 62, "数据分析困难"], ["钱七", 81, "方法选择困难"], ["孙八", 47, "项目设计困难"]]; return templates.map(([name, base, difficulty], index) => { const progress = clamp(base + randomInt(-12, 12), 25, 96); const researchScore = clamp(progress + randomInt(-12, 10), 45, 98); const analysisScore = clamp(progress + randomInt(-16, 12), 40, 98); const abilityScore = Math.round((progress + researchScore + analysisScore) / 3); const projectStatus = abilityScore >= 82 ? "优秀" : abilityScore < 58 ? "待修改" : "进行中"; return { id: `student-${index + 1}`, name, progress, completedChapters: Math.max(1, Math.min(8, Math.round(progress / 12))), agentUses: randomInt(2, 12), analysisCount: randomInt(1, 8), projectStatus, difficulty, researchScore, analysisScore, abilityScore, evaluation: abilityScore >= 82 ? "优秀" : abilityScore >= 65 ? "达标" : "需辅导" }; }); }
+function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }

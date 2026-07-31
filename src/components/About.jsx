@@ -6,12 +6,12 @@ export default function About() {
     <div className="space-y-6">
       <SectionHeader
         eyebrow="About Platform"
-        title="关于天府智传"
-        subtitle="天府智传是面向课程学习、项目实践、研究训练与过程评价的 AI 支持平台，以计算传播学课程为示范场景探索智能教学创新。"
+        title="关于知行智链"
+        subtitle="知行智链是一套面向高校课程教学场景设计的AI教育智能体系统。"
       />
       <div className="grid gap-4 md:grid-cols-2">
-        <InfoCard title="建设单位" tone="cyan">
-          西南财经大学天府学院
+        <InfoCard title="品牌定位" tone="cyan">
+          知行智链——AI教育智能体平台
         </InfoCard>
         <InfoCard title="平台定位" tone="mint">
           计算传播学课程学习智能体：面向课程学习、项目实践、研究训练与过程评价提供智能化、个性化支持。

@@ -1,3 +1,5 @@
+import BrandLogo from "./BrandLogo.jsx";
+
 const navItems = [
   ["home", "首页"],
   ["knowledge", "知识图谱"],
@@ -22,16 +24,10 @@ export default function Navbar({ active, onNavigate }) {
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-cyan/15 bg-ink/88 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
         <button onClick={() => onNavigate("home")} className="flex min-w-0 items-center gap-2.5 text-left">
-          {/* TODO: 替换为学校官方校徽 public/assets/school-badge.png */}
-          <img
-            src="/assets/school-badge.png"
-            alt="西南财经大学天府学院 Logo"
-            onError={(event) => { event.currentTarget.style.display = "none"; }}
-            className="h-11 w-11 shrink-0 object-contain"
-          />
+          <BrandLogo className="h-10 w-10 sm:h-12 sm:w-12" alt="知行智链品牌标识" />
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-slate-200">西南财经大学天府学院</div>
-            <div className="truncate text-base font-bold text-cyan">天府智传</div>
+            <div className="truncate text-base font-bold text-cyan">知行智链</div>
+            <div className="truncate text-xs font-medium text-slate-300">AI教育智能体平台</div>
           </div>
         </button>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-soft">

@@ -1,4 +1,5 @@
 import SectionHeader from "./SectionHeader.jsx";
+import BrandLogo from "./BrandLogo.jsx";
 
 const entries = [
   ["知识图谱", "学习课程核心知识", "knowledge", "cyan"],
@@ -18,28 +19,24 @@ export default function Home({ onNavigate }) {
   return (
     <div>
       <section className="relative mb-10 overflow-hidden rounded-3xl border border-cyan/20 bg-ink/85 p-8 shadow-glow sm:p-12">
-        {/* TODO: 替换为学校官方校园背景图 public/assets/campus-bg.jpg */}
+        {/* TODO: 品牌视觉资源 public/assets/ai-campus-bg.jpg */}
         <div
           aria-hidden="true"
-          className="absolute -inset-2 scale-105 bg-cover bg-center opacity-50 blur-[0.75px]"
-          style={{ backgroundImage: "url('/assets/campus-bg.jpg')" }}
+          className="absolute -inset-2 scale-105 bg-cover bg-center opacity-45 blur-[0.75px]"
+          style={{ backgroundImage: "url('/assets/ai-campus-bg.jpg')" }}
         />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#050f1e]/84 via-[#07111f]/76 to-[#081728]/72" />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#050f1e]/82 via-[#07111f]/74 to-[#081728]/70" />
         <div className="relative max-w-4xl">
           <div className="mb-5 flex items-center gap-2.5">
-            {/* TODO: 替换为学校官方校徽 public/assets/school-badge.png */}
-            <img
-              src="/assets/school-badge.png"
-              alt="西南财经大学天府学院 Logo"
-              onError={(event) => { event.currentTarget.style.display = "none"; }}
-              className="h-20 w-20 shrink-0 object-contain"
-            />
-            <div className="text-sm font-semibold tracking-wide text-slate-100 sm:text-base">西南财经大学天府学院</div>
+            {/* TODO: 品牌视觉资源 public/assets/brand-logo.png */}
+            <BrandLogo className="h-16 w-16 sm:h-20 sm:w-20" />
+            <div className="text-sm font-semibold tracking-wide text-slate-100 sm:text-base">知行智链 · AI教育智能体平台</div>
           </div>
-          <div className="mb-4 inline-flex rounded-full border border-mint/30 bg-mint/10 px-4 py-2 text-sm text-mint">课程学习智能体平台</div>
-          <h1 className="text-5xl font-bold leading-none tracking-tight text-white sm:text-7xl">天府智传</h1>
+          <div className="mb-4 inline-flex rounded-full border border-mint/30 bg-mint/10 px-4 py-2 text-sm text-mint">未来教育科技 · 多智能体协同</div>
+          <h1 className="text-5xl font-bold leading-none tracking-tight text-white sm:text-7xl">知行智链</h1>
           <p className="mt-4 text-xl font-medium text-cyan sm:text-2xl">计算传播学课程学习智能体</p>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-slate-300">面向课程教学、项目实践与智能评价的 AI 辅助学习平台。</p>
+          <p className="mt-2 text-base font-medium text-slate-200 sm:text-lg">计算传播学课程学习智能体</p>
+          <p className="mt-5 max-w-3xl text-base leading-8 text-slate-300">面向课程学习、研究实践与智能评价的AI教育智能体平台。</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {["课程学习", "项目实践", "研究训练", "过程评价"].map((tag) => <span key={tag} className="rounded-full border border-white/15 bg-ink/45 px-3 py-1.5 text-sm text-cyan backdrop-blur-sm">{tag}</span>)}
           </div>
@@ -76,7 +73,7 @@ export default function Home({ onNavigate }) {
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-mint/30 bg-mint/10 text-xl font-bold text-mint">AI</div>
           <div>
             <p className="text-sm font-semibold text-mint">平台简介</p>
-            <p className="mt-2 max-w-4xl text-base leading-8 text-slate-300">天府智传由西南财经大学天府学院建设，面向课程学习、项目实践、研究训练与过程评价，探索人工智能与课程融合创新。</p>
+            <p className="mt-2 max-w-4xl text-base leading-8 text-slate-300">知行智链面向课程学习、项目实践、研究训练与过程评价，通过多智能体协同支持学习者将问题意识转化为可执行、可评价的课程成果。</p>
           </div>
         </div>
       </section>
